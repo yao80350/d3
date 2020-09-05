@@ -100,5 +100,4 @@ const update = (data) => {
         .attr("height", (d) => height - y(d[value]));
 
     yLabel.text(ytext);
-    console.log(2, rects);
 };

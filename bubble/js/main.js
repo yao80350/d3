@@ -222,6 +222,7 @@ const initiateSlider = function () {
         range: false,
         slide: (event, ui) => {
             timeIndex = ui.value - startYear;
+            update();
         },
     });
 };

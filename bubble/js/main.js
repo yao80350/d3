@@ -10,6 +10,10 @@ const height = 500 - margin.top - margin.bottom;
 
 //Time index
 let timeIndex = 0;
+let formattedData = [];
+let selectedData = [];
+
+let interval = null;
 
 const svg = d3
     .select("#chart-area")
@@ -24,7 +28,7 @@ const g = svg
 //Scales
 const xScale = d3.scaleLog().base(10).domain([142, 150000]).range([0, width]);
 const yScale = d3.scaleLinear().domain([0, 90]).range([height, 0]);
-const radius = d3.scaleSqrt().domain([0, 1400000000]).range([0, 30]);
+const radius = d3.scaleSqrt().domain([142, 1400000000]).range([2, 40]);
 const contientColor = d3.scaleOrdinal(d3.schemePastel1);
 
 //Axes
@@ -67,6 +71,67 @@ const timeLabel = g
     .attr("y", height - 10)
     .attr("text-anchor", "end");
 
+//Legend
+const legend = g
+    .append("g")
+    .attr("class", "legend")
+    .attr("transform", `translate(${width - 10}, ${height - 125})`);
+
+const continents = ["asia", "europe", "africa", "americas"];
+continents.forEach((continent, i) => {
+    const legendRow = legend
+        .append("g")
+        .attr("transform", `translate(0, ${20 * i})`);
+
+    legendRow
+        .append("rect")
+        .attr("width", 10)
+        .attr("height", 10)
+        .attr("fill", contientColor(continent));
+    legendRow
+        .append("text")
+        .attr("x", -10)
+        .attr("y", 10)
+        .text(continent)
+        .attr("text-anchor", "end")
+        .style("text-transform", "capitalize");
+});
+
+//Tooltip
+const tooltip = d3
+    .select("#chart-area")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+tooltip.show = function (d) {
+    const circle = d3.select(this);
+    const { country, continent, life_exp, income, population } = d;
+    const xPosition = parseFloat(circle.attr("cx")) + margin.left;
+    const yPosition = parseFloat(circle.attr("cy")) + margin.top;
+    let html = `<div>Country: <span class="value">${country}</span></div>`;
+    html += `<div>Continent: <span class="value">${continent}</span></div>`;
+    html += `<div>Life Expectancy: <span class="value">${d3.format(".2f")(
+        life_exp
+    )}</span></div>`;
+    html += `<div>GDP Per Capita: <span class="value">${d3.format("$,.0f")(
+        income
+    )}</span></div>`;
+    html += `<div>Population: <span class="value">${d3.format(",.0f")(
+        population
+    )}</span></div>`;
+    tooltip
+        .transition()
+        .duration(100)
+        .style("opacity", 0.9)
+        .style("left", `${xPosition}px`)
+        .style("top", `${yPosition}px`);
+    tooltip.html(html).style("transform", "translate(-50%, -100%)");
+};
+
+tooltip.hide = () => {
+    tooltip.transition().duration(100).style("opacity", 0);
+};
+
 const update = (dataset) => {
     const { countries, year } = dataset;
     //Standard transition time
@@ -81,6 +146,8 @@ const update = (dataset) => {
         .enter()
         .append("circle")
         .attr("fill", (d) => contientColor(d.continent))
+        .on("mouseover", tooltip.show)
+        .on("mouseout", tooltip.hide)
         .merge(circles)
         .transition(t)
         .attr("cx", (d) => xScale(d.income))
@@ -90,6 +157,49 @@ const update = (dataset) => {
     //update the time label
     timeLabel.text(year);
 };
+
+const step = () => {
+    timeIndex = timeIndex >= selectedData.length - 1 ? 0 : timeIndex + 1;
+    update(selectedData[timeIndex]);
+};
+
+const playLoop = () => {
+    interval = setInterval(step, 100);
+};
+
+//Pause or Play
+document.getElementById("play-button").addEventListener("click", function () {
+    if (this.textContent.trim().toLowerCase() === "play") {
+        this.textContent = "Pause";
+        playLoop();
+    } else {
+        this.textContent = "Play";
+        clearInterval(interval);
+    }
+});
+
+//Reset
+document.getElementById("reset-button").addEventListener("click", function () {
+    timeIndex = 0;
+    update(selectedData[0]);
+});
+
+//Select continent
+document
+    .getElementById("continent-select")
+    .addEventListener("change", function () {
+        if (this.value === "all") {
+            selectedData = [...formattedData];
+        } else {
+            selectedData = formattedData.map((item) => {
+                countries = item.countries.filter(
+                    (d) => d.continent.toLowerCase() === this.value
+                );
+                return { countries, year: item.year };
+            });
+        }
+        update(selectedData[timeIndex]);
+    });
 
 d3.json("./data/data.json")
     .then((data) => {
@@ -104,12 +214,11 @@ d3.json("./data/data.json")
                 }
             });
         });
-        d3.interval(() => {
-            timeIndex = timeIndex >= data.length - 1 ? 0 : timeIndex + 1;
-            update(data[timeIndex]);
-        }, 100);
+        formattedData = data;
+        selectedData = [...formattedData];
+        playLoop();
 
-        update(data[0]);
+        update(selectedData[0]);
     })
     .catch((e) => {
         console.error(e.message);

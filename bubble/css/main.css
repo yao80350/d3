@@ -1,0 +1,43 @@
+circle {
+    stroke: #333;
+    stroke-opacity: 0.7;
+}
+
+.container {
+    padding-top: 5rem;
+}
+
+.form-control {
+    width: 150px;
+    float: right;
+}
+
+button {
+    margin: 10px;
+}
+
+#chart-area {
+    position: relative;
+    margin-top: 2rem;
+}
+
+#chart-area svg {
+    display: block;
+    margin: 0 auto;
+}
+
+div.tooltip {
+    position: absolute;
+    padding: 10px;
+    min-width: 160px;
+    font: 12px sans-serif;
+    background: #fff;
+    border: 0px;
+    border-radius: 10px;
+    pointer-events: none;
+    border: 1px solid #000;
+}
+
+.tooltip .value {
+    text-transform: capitalize;
+}

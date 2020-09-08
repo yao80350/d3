@@ -5,20 +5,25 @@
         <meta name="description" content="" />
         <title>Income and Life Expectancy</title>
         <link rel="stylesheet" href="css/bootstrap.min.css" />
+        <link rel="stylesheet" href="css/jquery-ui.min.css" />
         <link rel="stylesheet" href="css/main.css" />
     </head>
 
     <body>
         <div class="container">
             <div class="row">
-                <div class="col-sm-6">
+                <div class="col-md-6 btns">
                     <button id="play-button" class="btn btn-primary">
                         Pause</button
                     ><button id="reset-button" class="btn btn-secondary">
                         Reset
                     </button>
+                    <div id="slider-div">
+                        <label>Year: <span id="year">1950</span></label>
+                        <div id="date-slider"></div>
+                    </div>
                 </div>
-                <div class="col-sm-6">
+                <div class="col-md-6">
                     <select id="continent-select" class="form-control">
                         <option selected value="all">All</option>
                         <option value="europe">Europe</option>
@@ -37,6 +42,8 @@
 
         <!-- External JS libraries -->
         <script src="js/d3.min.js"></script>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/jquery-ui.min.js"></script>
         <!-- Custom JS -->
         <script src="js/main.js"></script>
     </body>

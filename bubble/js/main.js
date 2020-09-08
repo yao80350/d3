@@ -10,10 +10,16 @@ const height = 500 - margin.top - margin.bottom;
 
 //Time index
 let timeIndex = 0;
+let startYear = 1950;
+
 let formattedData = [];
 let selectedData = [];
 
 let interval = null;
+
+//Slider
+const $dateSlider = $("#date-slider");
+const $year = $("#year");
 
 const svg = d3
     .select("#chart-area")
@@ -132,8 +138,8 @@ tooltip.hide = () => {
     tooltip.transition().duration(100).style("opacity", 0);
 };
 
-const update = (dataset) => {
-    const { countries, year } = dataset;
+const update = () => {
+    const { countries, year } = selectedData[timeIndex];
     //Standard transition time
     const t = d3.transition().duration(100);
     //Join new data with old elements.
@@ -156,11 +162,15 @@ const update = (dataset) => {
 
     //update the time label
     timeLabel.text(year);
+
+    //Update year for Slider label and Slider value
+    $year.text(year);
+    $dateSlider.slider("value", year);
 };
 
 const step = () => {
     timeIndex = timeIndex >= selectedData.length - 1 ? 0 : timeIndex + 1;
-    update(selectedData[timeIndex]);
+    update();
 };
 
 const playLoop = () => {
@@ -181,7 +191,9 @@ document.getElementById("play-button").addEventListener("click", function () {
 //Reset
 document.getElementById("reset-button").addEventListener("click", function () {
     timeIndex = 0;
-    update(selectedData[0]);
+    update();
+    //Reset slider value
+    $dateSlider.slider("value", startYear);
 });
 
 //Select continent
@@ -198,8 +210,21 @@ document
                 return { countries, year: item.year };
             });
         }
-        update(selectedData[timeIndex]);
+        update();
     });
+
+//Date slider
+const initiateSlider = function () {
+    $dateSlider.slider({
+        max: startYear + formattedData.length - 1,
+        min: startYear,
+        step: 1,
+        range: false,
+        slide: (event, ui) => {
+            timeIndex = ui.value - startYear;
+        },
+    });
+};
 
 d3.json("./data/data.json")
     .then((data) => {
@@ -216,9 +241,11 @@ d3.json("./data/data.json")
         });
         formattedData = data;
         selectedData = [...formattedData];
+        //Initiate slider when there is data
+        initiateSlider();
         playLoop();
 
-        update(selectedData[0]);
+        update();
     })
     .catch((e) => {
         console.error(e.message);

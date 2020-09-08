@@ -7,23 +7,28 @@ circle {
     padding-top: 5rem;
 }
 
-.form-control {
-    width: 150px;
-    float: right;
+.btns {
+    display: flex;
+    align-items: center;
 }
 
 button {
     margin: 10px;
 }
 
-#chart-area {
-    position: relative;
-    margin-top: 2rem;
+#slider-div {
+    width: 250px;
+    margin: 10px;
 }
 
-#chart-area svg {
-    display: block;
-    margin: 0 auto;
+.form-control {
+    width: 150px;
+    margin: 10px;
+}
+
+#chart-area {
+    position: relative;
+    margin: 2rem auto;
 }
 
 div.tooltip {
